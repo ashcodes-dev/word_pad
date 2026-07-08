@@ -108,4 +108,6 @@ This project is focused on learning:
 
 ## License
 
-This project is released under the MIT License.
+This project is licensed under the GNU General Public License v2.0 (GPL-2.0).
+
+See the `LICENSE` file for details.
