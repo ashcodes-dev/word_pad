@@ -5,7 +5,7 @@
 #include <stdio.h>
 typedef struct {
     char text[100];
-int  length;
+    int  length;
 } data_line;
 int line = 0;
 
@@ -23,7 +23,7 @@ int menu_margin = 30;
 int main() {
     InitWindow(screen_width, screen_height, "Wordpad");
     SetTargetFPS(60); // Set the target frames-per-second
-	Vector2 cursor = { 0, menu_margin }; // Initialize cursor position
+    Vector2 cursor = { 0, menu_margin }; // Initialize cursor position
     data_line file[100] = { 0 };
     Font text_font = LoadFontEx("assets/fonts/OpenSans-Regular.ttf", 24, NULL, 0);
     GuiSetStyle(DEFAULT, TEXT_SIZE, 22);
@@ -31,11 +31,11 @@ int main() {
     while (!WindowShouldClose()) {    // main loop
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        input(file, &cursor ,text_font);
-        DrawRectangle(cursor.x, cursor.y, 10, 20, RED);
-		gui();
+        input(file, &cursor, text_font);
+        DrawRectangle(cursor.x, cursor.y, 1, 20, RED);
+        gui();
 
-        draw_text(&cursor, file , text_font);
+        draw_text(&cursor, file, text_font);
 
         EndDrawing();
     }
@@ -43,52 +43,70 @@ int main() {
     CloseWindow();
     return 0;
 }
-void  draw_text(Vector2* cursor, data_line file[] , Font text_font) {
-   
-    if (counter > 0 || line >0) {
-    for (int i = 0; i <=line; i++) {
-        DrawTextEx(text_font, file[i].text, (Vector2) { 0, i * 20 + menu_margin }, 24, 0, BLACK);
-    }
-}
-}
-void input( data_line file [] , Vector2  *cursor , Font text_font) {
-	int key = GetKeyPressed();
+void  draw_text(Vector2* cursor, data_line file[], Font text_font) {
 
-	if (key > 0) {
+    if (counter > 0 || line > 0) {
+        for (int i = 0; i <= line; i++) {
+            DrawTextEx(text_font, file[i].text, (Vector2) { 0, i * 20 + menu_margin }, 24, 0, BLACK);
+        }
+    }
+}
+void input(data_line file[], Vector2* cursor, Font text_font) {
+    int key = GetKeyPressed();
+
+    while ((key  = GetCharPressed()) != 0)
+    {
+        file[line].text[counter++] = (char)key;
+        file[line].text[counter] = '\0';
+       
         
-		  file [line].text[counter] = (char)key;
-		  file[line].text[counter + 1] = '\0'; // Null-terminate the string
-		counter++;
-		cursor->x = MeasureTextEx(text_font, file[line].text, 24, 0).x; // Update cursor position based on text width
-        
-	}
-   
-    if  ( (MeasureText(file[line].text, 20) >= screen_width  -20 ) || IsKeyPressed(KEY_ENTER)) {
+    }
+
+
+    if ((MeasureText(file[line].text, 20) >= screen_width - 20) || IsKeyPressed(KEY_ENTER)) {
         cursor->x = 0;
-        cursor->y += 20;
-        line++;// Move to the next line
-        counter = 0;
-        file[line].text[counter ] = '\0';
+       
+        file[line].length = counter;
+        line++;// Move to the next line0
         
+        counter = 0;
+        file[line].text[counter] = '\0';
+
     }
-    if (GuiButton((Rectangle) { 0, 0, 100, menu_margin }, "FILE"))
-    {
-        printf("Button clicked!\n");
+    cursor->x = MeasureTextEx(text_font, file[line].text, 24, 0).x;
+    cursor->y = (line * 20) + menu_margin;
+
+    static float cursor_cooldown = 0; 
+    if (IsKeyDown(KEY_BACKSPACE)) {
+        if (counter <=0) {
+            if (line > 0) {
+                line--;
+                counter = file[line].length;
+                file[line].text[counter] = '\0';
+                cursor_cooldown = 1.0f / 10.0f;
+
+            }
+        }
+        else {
+            file[line].text[counter] = '\0';
+            counter--;
+            cursor_cooldown = 1.0f / 5.0f;
+        }
     }
-    if (GuiButton((Rectangle) { 100, 0, 100, menu_margin }, "EDIT"))
-    {
-        printf("Button clicked!\n");
-    }
+
+
+   
 }
 void gui() {
-	 static bool file_button_pressed = false;
+    static bool file_button_pressed = false;
     if (GuiButton((Rectangle) { 0, 0, 100, menu_margin }, "FILE"))
 
-    { file_button_pressed = !file_button_pressed;
-	
-        
+    {
+        file_button_pressed = !file_button_pressed;
+
+
     }
-    if  (file_button_pressed) {
+    if (file_button_pressed) {
         if (GuiButton((Rectangle) { 0, menu_margin, 100, menu_margin }, "New")) {
             printf("New file created!\n");
             file_button_pressed = false; // Close the menu after clicking
@@ -111,4 +129,3 @@ void gui() {
         printf("Button clicked!\n");
     }
 }
-
