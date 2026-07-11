@@ -16,7 +16,9 @@ int screen_width = 800;
 int screen_height = 600;
 void input(data_line file[], Vector2* cursor, Font text_font);
 void  draw_text(Vector2* cursor, data_line file[], Font text_font);
-void gui();
+void load_file(data_line file[], FILE* fp);
+void save_file(data_line file[], int line_count);
+void gui(data_line file[]);
 
 int menu_margin = 30;
 
@@ -33,7 +35,7 @@ int main() {
         ClearBackground(RAYWHITE);
         input(file, &cursor, text_font);
         DrawRectangle(cursor.x, cursor.y, 1, 20, RED);
-        gui();
+        gui(file );
 
         draw_text(&cursor, file, text_font);
 
@@ -52,33 +54,53 @@ void  draw_text(Vector2* cursor, data_line file[], Font text_font) {
     }
 }
 void input(data_line file[], Vector2* cursor, Font text_font) {
-    int key = GetKeyPressed();
-
-    while ((key  = GetCharPressed()) != 0)
-    {
-        file[line].text[counter++] = (char)key;
-        file[line].text[counter] = '\0';
-       
-        
-    }
+    int key;
+    bool typing = false;
 
 
-    if ((MeasureText(file[line].text, 20) >= screen_width - 20) || IsKeyPressed(KEY_ENTER)) {
+    if ((typing == true &&
+        MeasureTextEx(text_font, file[line].text, 24, 0).x >= screen_width - 24) || IsKeyPressed(KEY_ENTER)) {
         cursor->x = 0;
-       
+
         file[line].length = counter;
         line++;// Move to the next line0
-        
+
         counter = 0;
         file[line].text[counter] = '\0';
+        printf("Line %d: '%s'\n", line, file[line].text);
+        printf("counter: %d\n", counter);
+        printf("line no %d\n", line);
 
     }
+    while (( key = GetCharPressed()) != 0)
+    {
+        file[line].text[counter] = (char)key;
+		counter++;
+        file[line].text[counter] = '\0';
+		typing = true;
+        
+
+
+    }
+    if ((typing == true &&
+        MeasureTextEx(text_font, file[line].text, 24, 0).x >= screen_width - 24) || IsKeyPressed(KEY_ENTER)) {
+        cursor->x = 0;
+
+        file[line].length = counter;
+        line++;// Move to the next line0
+
+        counter = 0;
+        
+    }
+
+
+    
     cursor->x = MeasureTextEx(text_font, file[line].text, 24, 0).x;
     cursor->y = (line * 20) + menu_margin;
 
-    static float cursor_cooldown = 0; 
-    if (IsKeyDown(KEY_BACKSPACE)) {
-        if (counter <=0) {
+    static float cursor_cooldown = 0;
+    if (IsKeyDown(KEY_BACKSPACE) && cursor_cooldown <= 0) {
+        if (counter <= 0) {
             if (line > 0) {
                 line--;
                 counter = file[line].length;
@@ -90,14 +112,16 @@ void input(data_line file[], Vector2* cursor, Font text_font) {
         else {
             file[line].text[counter] = '\0';
             counter--;
-            cursor_cooldown = 1.0f / 5.0f;
+            cursor_cooldown = 1.0f / 10.0f;
         }
+        
     }
+	cursor_cooldown -= GetFrameTime();  
 
 
-   
+
 }
-void gui() {
+void gui( data_line file []) {
     static bool file_button_pressed = false;
     if (GuiButton((Rectangle) { 0, 0, 100, menu_margin }, "FILE"))
 
@@ -113,10 +137,12 @@ void gui() {
         }
         if (GuiButton((Rectangle) { 0, menu_margin * 2, 100, menu_margin }, "Open")) {
             printf("Open file dialog!\n");
+            load_file(file, fopen("data/untitled.txt", "r"));
             file_button_pressed = false; // Close the menu after clicking
         }
         if (GuiButton((Rectangle) { 0, menu_margin * 3, 100, menu_margin }, "Save")) {
             printf("File saved!\n");
+			save_file(file, line);
             file_button_pressed = false; // Close the menu after clicking
         }
         if (GuiButton((Rectangle) { 0, menu_margin * 4, 100, menu_margin }, "Exit")) {
@@ -128,4 +154,28 @@ void gui() {
     {
         printf("Button clicked!\n");
     }
+}
+void create_new_file(data_line file[]) {
+	FILE* new_file = fopen("untitled.txt", "w");
+
+}
+void save_file(data_line file[], int line_count) {
+	FILE* fp= fopen("data/untitled.txt", "w");
+    for (int i = 0; i <= line_count; i++) {
+        fprintf(fp, "%s\n", file[i].text);
+	}
+	GuiLabel((Rectangle) { 0, 100, 200, 30 }, "File saved as untitled.txt");
+    
+}
+void load_file(data_line file[], FILE* fp) {
+    int i = 0;
+    
+    while (fgets(file[line].text, sizeof(file[line].text), fp) != NULL) {
+        file[line].length = strlen(file[line].text);
+        file[i].length = strlen(file[i].text);
+        counter = file[i].length;
+        line++;
+        i++;
+    }
+    
 }
