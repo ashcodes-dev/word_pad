@@ -28,7 +28,8 @@ int main() {
     Vector2 cursor = { 0, menu_margin }; // Initialize cursor position
     data_line file[100] = { 0 };
     Font text_font = LoadFontEx("assets/fonts/OpenSans-Regular.ttf", 24, NULL, 0);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 22);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
+	GuiSetFont(text_font);
 
     while (!WindowShouldClose()) {    // main loop
         BeginDrawing();
@@ -38,6 +39,7 @@ int main() {
         gui(file );
 
         draw_text(&cursor, file, text_font);
+		
 
         EndDrawing();
     }
@@ -58,20 +60,7 @@ void input(data_line file[], Vector2* cursor, Font text_font) {
     bool typing = false;
 
 
-    if ((typing == true &&
-        MeasureTextEx(text_font, file[line].text, 24, 0).x >= screen_width - 24) || IsKeyPressed(KEY_ENTER)) {
-        cursor->x = 0;
-
-        file[line].length = counter;
-        line++;// Move to the next line0
-
-        counter = 0;
-        file[line].text[counter] = '\0';
-        printf("Line %d: '%s'\n", line, file[line].text);
-        printf("counter: %d\n", counter);
-        printf("line no %d\n", line);
-
-    }
+  
     while (( key = GetCharPressed()) != 0)
     {
         file[line].text[counter] = (char)key;
@@ -82,8 +71,9 @@ void input(data_line file[], Vector2* cursor, Font text_font) {
 
 
     }
+   
     if ((typing == true &&
-        MeasureTextEx(text_font, file[line].text, 24, 0).x >= screen_width - 24) || IsKeyPressed(KEY_ENTER)) {
+        MeasureTextEx(text_font, file[line].text, 24, 0).x >= screen_width - 24) || IsKeyPressed(KEY_ENTER) ){
         cursor->x = 0;
 
         file[line].length = counter;
@@ -92,6 +82,7 @@ void input(data_line file[], Vector2* cursor, Font text_font) {
         counter = 0;
         
     }
+    
 
 
     
@@ -99,24 +90,25 @@ void input(data_line file[], Vector2* cursor, Font text_font) {
     cursor->y = (line * 20) + menu_margin;
 
     static float cursor_cooldown = 0;
-    if (IsKeyDown(KEY_BACKSPACE) && cursor_cooldown <= 0) {
+    if (IsKeyPressedRepeat(KEY_BACKSPACE)  || IsKeyPressed (KEY_BACKSPACE ) ) {
         if (counter <= 0) {
             if (line > 0) {
                 line--;
                 counter = file[line].length;
                 file[line].text[counter] = '\0';
-                cursor_cooldown = 1.0f / 10.0f;
+                
 
             }
         }
         else {
-            file[line].text[counter] = '\0';
             counter--;
-            cursor_cooldown = 1.0f / 10.0f;
+            file[line].text[counter] = '\0';
+            
+            
         }
         
     }
-	cursor_cooldown -= GetFrameTime();  
+	
 
 
 
@@ -157,15 +149,20 @@ void gui( data_line file []) {
 }
 void create_new_file(data_line file[]) {
 	FILE* new_file = fopen("untitled.txt", "w");
+    for (int i = 0; i <= line; i++) {
+        file[i].text[0] = '\0';
+    }
+    line = 0;
+    counter = 0;
 
 }
 void save_file(data_line file[], int line_count) {
-	FILE* fp= fopen("data/untitled.txt", "w");
+    FILE* fp = fopen("data/untitled.txt", "w");
     for (int i = 0; i <= line_count; i++) {
         fprintf(fp, "%s\n", file[i].text);
-	}
-	GuiLabel((Rectangle) { 0, 100, 200, 30 }, "File saved as untitled.txt");
-    
+    }
+    GuiLabel((Rectangle) { 0, 100, 200, 30 }, "File saved as untitled.txt");
+
 }
 void load_file(data_line file[], FILE* fp) {
     int i = 0;
@@ -177,5 +174,8 @@ void load_file(data_line file[], FILE* fp) {
         line++;
         i++;
     }
+    line++;
+	counter = 0;
+
     
 }
