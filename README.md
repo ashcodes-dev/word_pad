@@ -93,11 +93,11 @@ This project is focused on learning:
 - [x] Basic text rendering
 - [x] Cursor
 - [x] Automatic wrapping
-- [ ] Backspace
+- [x] Backspace
 - [ ] Arrow keys
-- [ ] Save files
-- [ ] Open files
-- [ ] Menu bar
+- [x] Save files
+- [x] Open files
+- [x] Menu bar
 - [ ] Undo/Redo
 - [ ] Scroll support
 - [ ] Selection
