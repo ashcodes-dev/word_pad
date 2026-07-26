@@ -16,6 +16,7 @@ int screen_width = 800;
 int screen_height = 600;
 void input(data_line file[], Vector2* cursor, Font text_font);
 void  draw_text(Vector2* cursor, data_line file[], Font text_font);
+void create_new_file(data_line file[]);
 void load_file(data_line file[], FILE* fp);
 void save_file(data_line file[], int line_count);
 void gui(data_line file[]);
@@ -36,9 +37,10 @@ int main() {
         ClearBackground(RAYWHITE);
         input(file, &cursor, text_font);
         DrawRectangle(cursor.x, cursor.y, 1, 20, RED);
-        gui(file );
+        
 
         draw_text(&cursor, file, text_font);
+        gui(file);
 		
 
         EndDrawing();
@@ -125,6 +127,8 @@ void gui( data_line file []) {
     if (file_button_pressed) {
         if (GuiButton((Rectangle) { 0, menu_margin, 100, menu_margin }, "New")) {
             printf("New file created!\n");
+            create_new_file(file);
+
             file_button_pressed = false; // Close the menu after clicking
         }
         if (GuiButton((Rectangle) { 0, menu_margin * 2, 100, menu_margin }, "Open")) {
@@ -148,7 +152,7 @@ void gui( data_line file []) {
     }
 }
 void create_new_file(data_line file[]) {
-	FILE* new_file = fopen("untitled.txt", "w");
+	FILE* new_file = fopen("data/untitled.txt", "w");
     for (int i = 0; i <= line; i++) {
         file[i].text[0] = '\0';
     }
@@ -175,7 +179,5 @@ void load_file(data_line file[], FILE* fp) {
         i++;
     }
     line++;
-	counter = 0;
-
-    
+	counter = 0; 
 }
