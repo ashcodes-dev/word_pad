@@ -178,6 +178,6 @@ void load_file(data_line file[], FILE* fp) {
         line++;
         i++;
     }
-    line++;
+    
 	counter = 0; 
 }
